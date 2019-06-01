@@ -72,6 +72,8 @@ UMAIL.CONNECT_TO_MAIL_SERVER({
 					
 					SHOW_ERROR('MongoDB에 이상 현상이 발생했습니다.');
 					
+					sendMail(config.serverName + '의 MongoDB에 이상 현상이 발생해 복구하였습니다.', 'MongoDB에 이상 현상이 발생해 복구하였습니다.\n' + config.serverName + '을(를) 체크하시기 바랍니다.');
+					
 					// DB 복구 절차 수행
 					REPEAT(config.mongoDeamonCount, (i) => {
 						let index = i + 1;
@@ -94,13 +96,11 @@ UMAIL.CONNECT_TO_MAIL_SERVER({
 						// Mongos 복구 절차 수행
 						run('mongos --port 27018 --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_mongos.log --configdb csReplSet/localhost:40001,localhost:40002,localhost:40003 --bind_ip_all', () => {
 							
+							
+							console.log(CONSOLE_GREEN('복구를 완료하였습니다.'));
+							
 							// 모든 forever 데몬 재시작
-							run('forever restartall', () => {
-								
-								console.log(CONSOLE_GREEN('복구를 완료하였습니다.'));
-								
-								sendMail(config.serverName + '의 MongoDB에 이상 현상이 발생해 복구하였습니다.', 'MongoDB에 이상 현상이 발생해 복구하였습니다.\n' + config.serverName + '을(를) 체크하시기 바랍니다.');
-							});
+							run('forever restartall');
 						});
 					});
 				}
