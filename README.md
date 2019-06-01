@@ -9,6 +9,13 @@
 git clone https://github.com/Hanul/MongoDBMedic
 ```
 
+## MongoDB 설정
+```
+sh.enableSharding('MongoDBMedicTest');
+
+sh.shardCollection('MongoDBMedicTest.MongoDBMedic.Test', {_id : 1});
+```
+
 ## 설정 (`config.json`)
 ```javascript
 {
