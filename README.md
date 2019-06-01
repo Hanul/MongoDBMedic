@@ -12,10 +12,10 @@ git clone https://github.com/Hanul/MongoDBMedic
 ## 설정 (`config.json`)
 ```javascript
 {
-	"mongoDeamonCount" : 8,
 	"mongoPort" : 27018,
+	"mongoDeamonCount" : 8,
 	
-	"testDBName" : "test",
+	"testDBName" : "MongoDBMedicTest",
 	"testDBUsername" : "test",
 	"testDBPassword" : "test123",
 	
