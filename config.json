@@ -1,0 +1,21 @@
+{
+	"mongoHost" : "127.0.0.1",
+	"mongoPort" : 27018,
+	"mongoDeamonCount" : 8,
+	
+	"testDBName" : "test",
+	"testDBUsername" : "test",
+	"testDBPassword" : "test123",
+	
+	"mailHost" : "smtp.gmail.com",
+	"mailPort" : 465,
+	"isMailSecure" : true,
+	"mailUsername" : "sender@hanul.me",
+	"mailPassword" : "ENTER YOUR PASSWORD",
+	
+	"mailSenderName" : "BTNcafe Contact",
+	"mailSenderAddress" : "sender@hanul.me",
+	"mailReceiverAddress" : "hanul@hanul.me",
+	
+	"serverName" : "My Server"
+}
