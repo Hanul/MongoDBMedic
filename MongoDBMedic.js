@@ -53,8 +53,8 @@ UMAIL.CONNECT_TO_MAIL_SERVER({
 	
 	let isErrorOccured = false;
 	
-	// 1초에 한번씩 DB 체크
-	INTERVAL(1, RAR(() => {
+	// 2초에 한번씩 DB 체크
+	INTERVAL(2, RAR(() => {
 		
 		if (isErrorOccured !== true) {
 			
