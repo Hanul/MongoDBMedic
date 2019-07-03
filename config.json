@@ -2,7 +2,7 @@
 	"mongoPort" : 27018,
 	"mongoDeamonCount" : 8,
 	
-	"testDBName" : "MongoDBMedicTest",
+	"testDBName" : "SkyMongoMedicTest",
 	"testDBUsername" : "test",
 	"testDBPassword" : "test123",
 	
