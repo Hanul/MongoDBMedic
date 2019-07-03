@@ -49,3 +49,5 @@ WEB_SERVER(config.medicPort, (requestInfo, _response) => {
 		run('forever restartall');
 	}
 });
+
+console.log(CONSOLE_GREEN('MongoDBMedic이 실행중입니다...'));
