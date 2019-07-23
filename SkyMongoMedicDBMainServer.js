@@ -63,14 +63,16 @@ WEB_SERVER(config.medicPort, (requestInfo, _response) => {
 		DELAY(2, () => {
 			
 			// Mongos 복구 절차 수행
-			run('mongos --port 27018 --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_mongos.log --configdb csReplSet/localhost:40001,localhost:40002,localhost:40003 --bind_ip_all', () => {
+			run('mongos --port 27018 --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_mongos.log --configdb csReplSet/localhost:40001,localhost:40002,localhost:40003 --bind_ip_all');
+		});
+		
+		DELAY(3, () => {
 				
-				console.log(CONSOLE_GREEN('복구를 완료하였습니다.'));
-				
-				// 완료 반환
-				response({
-					isDone : true
-				});
+			console.log(CONSOLE_GREEN('복구를 완료하였습니다.'));
+			
+			// 완료 반환
+			response({
+				isDone : true
 			});
 		});
 	}
