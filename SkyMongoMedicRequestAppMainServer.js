@@ -134,8 +134,6 @@ UMAIL.CONNECT_TO_MAIL_SERVER({
 		let nowCal = CALENDAR();
 		
 		if (
-		isErrorOccured !== true &&
-		
 		// 예외 시간에 걸치지 않은 경우에만
 		(
 			config.exceptHourStart !== undefined &&
