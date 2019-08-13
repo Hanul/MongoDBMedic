@@ -58,8 +58,25 @@ forever start SkyMongoMedic.js
 My Server을(를) 체크하시기 바랍니다.
 ```
 
+## HTTP 요청으로 상태 확인
+데이터베이스 상태가 아닌 HTTP 요청을 통해 이상 발생 여부를 확인하고자 하는 경우에는  `config.json` 설정 파일에 아래와 같이 몇 가지 정보들을 추가합니다.
+
+- `checkURL` 체크할 URL을 입력합니다. 이 URL에 요청을 보내 500 상태 코드가 반환되면 복구 작업을 수행합니다.
+- `exceptHourStart` 예외 시간의 시작 시를 지정합니다.
+- `exceptMinuteStart` 예외 시간의 시작 분을 지정합니다. 
+- `exceptHourEnd` 예외 시간의 종료 시를 지정합니다.
+- `exceptMinuteEnd` 예외 시간의 종료 분을 지정합니다.
+
+이후 아래 명령으로 실행합니다.
+```
+node SkyMongoMedicRequest.js
+```
+```
+forever start SkyMongoMedicRequest.js
+```
+
 ## 분산 서버 환경인 경우
-`config.json` 설정 파일에 아래와 같이 몇 가지 정보들을 추가합니다.
+분산 서버 환경에서는 `config.json` 설정 파일에 아래와 같이 몇 가지 정보들을 추가합니다.
 
 - `mongoHost` mongos의 호스트를 입력합니다.
 - `medicPort` SkyMongoMedic이 서로 연결될 포트 번호입니다.

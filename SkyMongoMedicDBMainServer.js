@@ -78,4 +78,4 @@ WEB_SERVER(config.medicPort, (requestInfo, _response) => {
 	}
 });
 
-console.log(CONSOLE_GREEN('MongoDBMedic이 실행중입니다...'));
+console.log(CONSOLE_GREEN('SkyMongoMedic이 실행중입니다...'));

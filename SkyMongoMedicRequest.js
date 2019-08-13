@@ -22,17 +22,6 @@ let config = JSON.parse(READ_FILE({
 	isSync : true
 }));
 
-CONNECT_TO_DB_SERVER({
-	port : config.mongoPort,
-	name : config.testDBName,
-	username : config.testDBUsername,
-	password : config.testDBPassword
-});
-
-BOX('SkyMongoMedic');
-
-let testDB = SkyMongoMedic.DB('Test');
-
 UMAIL.CONNECT_TO_MAIL_SERVER({
 	host : config.mailHost,
 	port : config.mailPort,
@@ -53,18 +42,26 @@ UMAIL.CONNECT_TO_MAIL_SERVER({
 	
 	let isErrorOccured = false;
 	
-	// 2초에 한번씩 DB 체크
+	// 2초에 한번씩 체크
 	INTERVAL(2, RAR(() => {
 		
-		if (isErrorOccured !== true) {
+		let nowCal = CALENDAR();
+		
+		if (
+		isErrorOccured !== true &&
+		
+		// 예외 시간에 걸치지 않은 경우에만
+		(
+			config.exceptHourStart !== undefined &&
+			config.exceptMinuteStart !== undefined &&
+			config.exceptHourEnd !== undefined &&
+			config.exceptMinuteEnd !== undefined &&
 			
-			testDB.get({
-				
-				notExists : () => {
-					testDB.create({
-						ping : 'pong'
-					});
-				},
+			(nowCal.getHour() > config.exceptHourStart || (nowCal.getHour() === config.exceptHourStart && nowCal.getMinute() >= config.exceptMinuteStart)) &&
+			(nowCal.getHour() < config.exceptHourEnd || (nowCal.getHour() === config.exceptHourEnd && nowCal.getMinute() <= config.exceptMinuteEnd))
+		) !== true) {
+			
+			GET(config.checkURL, {
 				
 				// 오류 발생!!
 				error : () => {
