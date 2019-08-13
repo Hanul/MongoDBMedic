@@ -54,7 +54,6 @@ UMAIL.CONNECT_TO_MAIL_SERVER({
 					}
 				},
 				
-				
 				// 오류 발생!!
 				error : (errorMsg, statusCode) => {
 					
