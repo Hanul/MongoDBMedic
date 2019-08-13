@@ -42,48 +42,61 @@ UMAIL.CONNECT_TO_MAIL_SERVER({
 	
 	let isErrorOccured = false;
 	
-	let check = (checkURL) => {
+	let check = (checkURL, callback) => {
 		
-		GET(checkURL, {
+		if (isErrorOccured !== true) {
 			
-			// 오류 발생!!
-			error : () => {
-				isErrorOccured = true;
+			GET(checkURL, {
 				
-				SHOW_ERROR('MongoDB에 이상 현상이 발생했습니다.');
+				success : () => {
+					if (callback !== undefined) {
+						callback();
+					}
+				},
 				
-				sendMail(config.serverName + '의 MongoDB에 이상 현상이 발생해 복구하였습니다.', 'MongoDB에 이상 현상이 발생해 복구하였습니다.\n' + config.serverName + '을(를) 체크하시기 바랍니다.');
-				
-				// DB 복구 절차 수행
-				REPEAT(config.mongoDeamonCount, (i) => {
-					let index = i + 1;
+				// 오류 발생!!
+				error : () => {
+					isErrorOccured = true;
 					
-					run('mongod --shardsvr --port 3000' + index + ' --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_db' + index + '.log --dbpath /data/shard_db' + index);
-				});
-				
-				DELAY(1, () => {
+					SHOW_ERROR('MongoDB에 이상 현상이 발생했습니다.');
 					
-					// Config DB 복구 절차 수행
-					[
-						'mongod --configsvr --replSet csReplSet --port 40001 --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_config1.log --dbpath /data/shard_config1',
-						'mongod --configsvr --replSet csReplSet --port 40002 --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_config2.log --dbpath /data/shard_config2',
-						'mongod --configsvr --replSet csReplSet --port 40003 --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_config3.log --dbpath /data/shard_config3'
-					].forEach(run);
-				});
-				
-				DELAY(2, () => {
+					sendMail(config.serverName + '의 MongoDB에 이상 현상이 발생해 복구하였습니다.', 'MongoDB에 이상 현상이 발생해 복구하였습니다.\n' + config.serverName + '을(를) 체크하시기 바랍니다.');
 					
-					// Mongos 복구 절차 수행
-					run('mongos --port 27018 --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_mongos.log --configdb csReplSet/localhost:40001,localhost:40002,localhost:40003 --bind_ip_all', () => {
+					// DB 복구 절차 수행
+					REPEAT(config.mongoDeamonCount, (i) => {
+						let index = i + 1;
 						
-						console.log(CONSOLE_GREEN('복구를 완료하였습니다.'));
-						
-						// 모든 forever 데몬 재시작
-						run('forever restartall');
+						run('mongod --shardsvr --port 3000' + index + ' --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_db' + index + '.log --dbpath /data/shard_db' + index);
 					});
-				});
-			}
-		});
+					
+					DELAY(1, () => {
+						
+						// Config DB 복구 절차 수행
+						[
+							'mongod --configsvr --replSet csReplSet --port 40001 --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_config1.log --dbpath /data/shard_config1',
+							'mongod --configsvr --replSet csReplSet --port 40002 --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_config2.log --dbpath /data/shard_config2',
+							'mongod --configsvr --replSet csReplSet --port 40003 --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_config3.log --dbpath /data/shard_config3'
+						].forEach(run);
+					});
+					
+					DELAY(2, () => {
+						
+						// Mongos 복구 절차 수행
+						run('mongos --port 27018 --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_mongos.log --configdb csReplSet/localhost:40001,localhost:40002,localhost:40003 --bind_ip_all', () => {
+							
+							console.log(CONSOLE_GREEN('복구를 완료하였습니다.'));
+							
+							// 모든 forever 데몬 재시작
+							run('forever restartall');
+						});
+					});
+					
+					if (callback !== undefined) {
+						callback();
+					}
+				}
+			});
+		}
 	};
 	
 	// 2초에 한번씩 체크
@@ -92,8 +105,6 @@ UMAIL.CONNECT_TO_MAIL_SERVER({
 		let nowCal = CALENDAR();
 		
 		if (
-		isErrorOccured !== true &&
-		
 		// 예외 시간에 걸치지 않은 경우에만
 		(
 			config.exceptHourStart !== undefined &&
@@ -106,7 +117,7 @@ UMAIL.CONNECT_TO_MAIL_SERVER({
 		) !== true) {
 			
 			if (CHECK_IS_ARRAY(config.checkURL) === true) {
-				EACH(config.checkURL, check);
+				NEXT(config.checkURL, check);
 			} else {
 				check(config.checkURL);
 			}

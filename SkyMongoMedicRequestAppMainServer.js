@@ -42,74 +42,87 @@ UMAIL.CONNECT_TO_MAIL_SERVER({
 	
 	let isErrorOccured = false;
 	
-	let check = (checkURL) => {
+	let check = (checkURL, callback) => {
 		
-		GET(checkURL, {
+		if (isErrorOccured !== true) {
 			
-			// 오류 발생!!
-			error : () => {
-				isErrorOccured = true;
+			GET(checkURL, {
 				
-				SHOW_ERROR('MongoDB에 이상 현상이 발생했습니다.');
+				success : () => {
+					if (callback !== undefined) {
+						callback();
+					}
+				},
 				
-				sendMail(config.serverName + '의 MongoDB에 이상 현상이 발생해 복구하였습니다.', 'MongoDB에 이상 현상이 발생해 복구하였습니다.\n' + config.serverName + '을(를) 체크하시기 바랍니다.');
-				
-				// 복구 절차 수행
-				
-				// 우선 데이터베이스 서버들을 재시작합니다.
-				EACH(config.dbServerHosts, (dbServerHost) => {
+				// 오류 발생!!
+				error : () => {
+					isErrorOccured = true;
 					
-					POST({
-						host : dbServerHost,
-						port : config.medicPort,
-						uri : 'recover',
-						data : {
-							password : config.medicPassword
-						}
-					}, (result) => {
-						result = PARSE_STR(result);
+					SHOW_ERROR('MongoDB에 이상 현상이 발생했습니다.');
+					
+					sendMail(config.serverName + '의 MongoDB에 이상 현상이 발생해 복구하였습니다.', 'MongoDB에 이상 현상이 발생해 복구하였습니다.\n' + config.serverName + '을(를) 체크하시기 바랍니다.');
+					
+					// 복구 절차 수행
+					
+					// 우선 데이터베이스 서버들을 재시작합니다.
+					EACH(config.dbServerHosts, (dbServerHost) => {
 						
-						if (result.isDone === true) {
+						POST({
+							host : dbServerHost,
+							port : config.medicPort,
+							uri : 'recover',
+							data : {
+								password : config.medicPassword
+							}
+						}, (result) => {
+							result = PARSE_STR(result);
 							
-							// 이후 메인 데이터베이스 서버를 재시작합니다.
-							POST({
-								host : config.mongoHost,
-								port : config.medicPort,
-								uri : 'recover',
-								data : {
-									password : config.medicPassword
-								}
-							}, (result) => {
-								result = PARSE_STR(result);
+							if (result.isDone === true) {
 								
-								if (result.isDone === true) {
+								// 이후 메인 데이터베이스 서버를 재시작합니다.
+								POST({
+									host : config.mongoHost,
+									port : config.medicPort,
+									uri : 'recover',
+									data : {
+										password : config.medicPassword
+									}
+								}, (result) => {
+									result = PARSE_STR(result);
 									
-									// 이후 앱 서버들을 재시작합니다.
-									EACH(config.appServerHosts, (appServerHost) => {
+									if (result.isDone === true) {
 										
-										POST({
-											host : appServerHost,
-											port : config.medicPort,
-											uri : 'recover',
-											data : {
-												password : config.medicPassword
-											}
+										// 이후 앱 서버들을 재시작합니다.
+										EACH(config.appServerHosts, (appServerHost) => {
+											
+											POST({
+												host : appServerHost,
+												port : config.medicPort,
+												uri : 'recover',
+												data : {
+													password : config.medicPassword
+												}
+											});
 										});
-									});
-									
-									// 마지막으로 현재 서버를 재시작합니다.
-									
-									console.log(CONSOLE_GREEN('복구를 완료하였습니다.'));
-									
-									// 모든 forever 데몬 재시작
-									run('forever restartall');
-								}
-							});
-						}
+										
+										// 마지막으로 현재 서버를 재시작합니다.
+										
+										console.log(CONSOLE_GREEN('복구를 완료하였습니다.'));
+										
+										// 모든 forever 데몬 재시작
+										run('forever restartall');
+									}
+								});
+							}
+						});
 					});
-				});
-			}
-		});
+					
+					if (callback !== undefined) {
+						callback();
+					}
+				}
+			});
+		}
 	};
 	
 	// 2초에 한번씩 체크
@@ -132,7 +145,7 @@ UMAIL.CONNECT_TO_MAIL_SERVER({
 		) !== true) {
 			
 			if (CHECK_IS_ARRAY(config.checkURL) === true) {
-				EACH(config.checkURL, check);
+				NEXT(config.checkURL, check);
 			} else {
 				check(config.checkURL);
 			}
