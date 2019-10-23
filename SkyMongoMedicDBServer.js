@@ -56,6 +56,8 @@ WEB_SERVER(config.medicPort, (requestInfo, _response) => {
 		response({
 			isDone : true
 		});
+		
+		return false;
 	}
 });
 

@@ -47,6 +47,13 @@ WEB_SERVER(config.medicPort, (requestInfo, _response) => {
 		
 		// 모든 forever 데몬 재시작
 		run('forever restartall');
+		
+		// 완료 반환
+		response({
+			isDone : true
+		});
+		
+		return false;
 	}
 });
 

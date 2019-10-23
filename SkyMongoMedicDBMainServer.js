@@ -75,6 +75,8 @@ WEB_SERVER(config.medicPort, (requestInfo, _response) => {
 				isDone : true
 			});
 		});
+		
+		return false;
 	}
 });
 
