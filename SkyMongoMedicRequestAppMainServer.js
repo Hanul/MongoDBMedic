@@ -151,7 +151,7 @@ UMAIL.CONNECT_TO_MAIL_SERVER({
 	};
 	
 	// 2초에 한번씩 체크
-	INTERVAL(2, RAR(() => {
+	INTERVAL(2, () => {
 		
 		let nowCal = CALENDAR();
 		
@@ -173,7 +173,7 @@ UMAIL.CONNECT_TO_MAIL_SERVER({
 				check(config.checkURL);
 			}
 		}
-	}));
+	});
 	
 	console.log(CONSOLE_GREEN('SkyMongoMedic이 실행중입니다...'));
 });
