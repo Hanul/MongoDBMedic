@@ -43,38 +43,56 @@ WEB_SERVER(config.medicPort, (requestInfo, _response) => {
 		
 		SHOW_ERROR('복구 명령을 받았습니다.');
 		
-		// DB 복구 절차 수행
-		REPEAT(config.mongoDeamonCount, (i) => {
-			let index = i + 1;
+		if (config.mongoDeamonCount === 1) {
 			
-			run('mongod --shardsvr --port 3000' + index + ' --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_db' + index + '.log --dbpath /data/shard_db' + index);
-		});
-		
-		DELAY(1, () => {
+			run('mongod --port 27018 --fork --logpath /var/log/mongodb.log --logappend --auth --bind_ip_all');
 			
-			// Config DB 복구 절차 수행
-			[
-				'mongod --configsvr --replSet csReplSet --port 40001 --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_config1.log --dbpath /data/shard_config1',
-				'mongod --configsvr --replSet csReplSet --port 40002 --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_config2.log --dbpath /data/shard_config2',
-				'mongod --configsvr --replSet csReplSet --port 40003 --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_config3.log --dbpath /data/shard_config3'
-			].forEach(run);
-		});
-		
-		DELAY(2, () => {
-			
-			// Mongos 복구 절차 수행
-			run('mongos --port 27018 --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_mongos.log --configdb csReplSet/localhost:40001,localhost:40002,localhost:40003 --bind_ip_all');
-		});
-		
-		DELAY(3, () => {
+			DELAY(1, () => {
+					
+				console.log(CONSOLE_GREEN('복구를 완료하였습니다.'));
 				
-			console.log(CONSOLE_GREEN('복구를 완료하였습니다.'));
-			
-			// 완료 반환
-			response({
-				isDone : true
+				// 완료 반환
+				response({
+					isDone : true
+				});
 			});
-		});
+		}
+		
+		else {
+			
+			// DB 복구 절차 수행
+			REPEAT(config.mongoDeamonCount, (i) => {
+				let index = i + 1;
+				
+				run('mongod --shardsvr --port 3000' + index + ' --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_db' + index + '.log --dbpath /data/shard_db' + index);
+			});
+			
+			DELAY(1, () => {
+				
+				// Config DB 복구 절차 수행
+				[
+					'mongod --configsvr --replSet csReplSet --port 40001 --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_config1.log --dbpath /data/shard_config1',
+					'mongod --configsvr --replSet csReplSet --port 40002 --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_config2.log --dbpath /data/shard_config2',
+					'mongod --configsvr --replSet csReplSet --port 40003 --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_config3.log --dbpath /data/shard_config3'
+				].forEach(run);
+			});
+			
+			DELAY(2, () => {
+				
+				// Mongos 복구 절차 수행
+				run('mongos --port 27018 --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_mongos.log --configdb csReplSet/localhost:40001,localhost:40002,localhost:40003 --bind_ip_all');
+			});
+			
+			DELAY(3, () => {
+					
+				console.log(CONSOLE_GREEN('복구를 완료하였습니다.'));
+				
+				// 완료 반환
+				response({
+					isDone : true
+				});
+			});
+		}
 		
 		return false;
 	}

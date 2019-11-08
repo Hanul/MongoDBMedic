@@ -43,12 +43,19 @@ WEB_SERVER(config.medicPort, (requestInfo, _response) => {
 		
 		SHOW_ERROR('복구 명령을 받았습니다.');
 		
-		// DB 복구 절차 수행
-		REPEAT(config.mongoDeamonCount, (i) => {
-			let index = i + 1;
+		if (config.mongoDeamonCount === 1) {
+			run('mongod --port 27018 --fork --logpath /var/log/mongodb.log --logappend --auth --bind_ip_all');
+		}
+		
+		else {
 			
-			run('mongod --shardsvr --port 3000' + index + ' --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_db' + index + '.log --dbpath /data/shard_db' + index);
-		});
+			// DB 복구 절차 수행
+			REPEAT(config.mongoDeamonCount, (i) => {
+				let index = i + 1;
+				
+				run('mongod --shardsvr --port 3000' + index + ' --fork --keyFile /srv/mongodb/mongodb-shard-keyfile --logpath /var/log/mongo_shard_db' + index + '.log --dbpath /data/shard_db' + index);
+			});
+		}
 		
 		console.log(CONSOLE_GREEN('복구를 완료하였습니다.'));
 		
